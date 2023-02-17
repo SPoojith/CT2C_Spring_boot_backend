@@ -1,5 +1,6 @@
 package com.tns.placment_management_system.service;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +26,12 @@ public class CollegeService {
 		return repo.findById(Id).get();
 	}
 	
-	public boolean deleteById(Long Id) {
+	public boolean deleteById(Long Id){
 		try {
 			repo.deleteById(Id);
 			return true;
 		}catch (Exception e) {
-			return false;	
+			return false;
 		}
 	}
 	

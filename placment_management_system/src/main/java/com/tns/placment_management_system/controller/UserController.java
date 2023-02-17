@@ -1,5 +1,6 @@
 package com.tns.placment_management_system.controller;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tns.placment_management_system.Exceptions.NoUserException;
+import com.tns.placment_management_system.Exceptions.NotAnAdmin;
 import com.tns.placment_management_system.Exceptions.WrongPassword;
+import com.tns.placment_management_system.model.Admin;
 import com.tns.placment_management_system.model.Login;
 import com.tns.placment_management_system.model.User;
 import com.tns.placment_management_system.service.UserService;
@@ -37,7 +40,13 @@ public class UserController {
 	
 	@DeleteMapping("/deleteUserById/{id}")
 	public ResponseEntity<String> deleteById(@PathVariable Long id) {
-		boolean b = service.deleteById(id);
+		boolean b;
+		try {
+			b = service.deleteById(id);
+		} catch (org.springframework.dao.DataIntegrityViolationException e) {
+			// TODO Auto-generated catch block
+			return new ResponseEntity<String>("some admin records are dependent on this user",HttpStatus.EXPECTATION_FAILED);
+		}
 		if(b) {
 			return new ResponseEntity<String>("deleted successfully",HttpStatus.OK);
 		}else {
@@ -74,11 +83,31 @@ public class UserController {
 	public ResponseEntity<String> login(@RequestBody Login login) {
 		try {
 			User user = service.login(login.getUsername(), login.getPassword());
-			return new ResponseEntity<String>("right unser name right password \n"+user,HttpStatus.BAD_GATEWAY);
+			return new ResponseEntity<String>("right unser name right password user login successful\n"+user,HttpStatus.BAD_GATEWAY);
 		}catch(NoUserException e) {
 			System.out.println(e);
 			System.out.println("came to controller nouser password");
 			return new ResponseEntity<String>(e+"\nlogin unsuccessfull wrong username",HttpStatus.LOCKED);
+		}catch(WrongPassword e) {
+			System.out.println(e);
+			System.out.println("came to controller wrong password");
+			return new ResponseEntity<String>(e+"\nlogin unsuccessfull right username but wrong password",HttpStatus.LOCKED);
+		}
+		catch (Exception e) {
+			System.out.print("came to controller exception");
+			return new ResponseEntity<String>("\nlogin unsuccessfull its not u tryagain",HttpStatus.BAD_REQUEST);
+		}
+	}
+	@PostMapping("/adminlogin")
+	public ResponseEntity<String> adminlogin(@RequestBody Login login) {
+		try {
+			System.out.println("username"+login.getUsername()+" "+login.getPassword());
+			Admin user = service.admlogin(login.getUsername(), login.getPassword());
+			return new ResponseEntity<String>("right unser name right password admin login successful\n"+user,HttpStatus.BAD_GATEWAY);
+		}catch(NotAnAdmin e) {
+			System.out.println(e);
+			System.out.println("came to controller not an admin ");
+			return new ResponseEntity<String>(e+"\nlogin unsuccessfull wrong username or not an admin",HttpStatus.LOCKED);
 		}catch(WrongPassword e) {
 			System.out.println(e);
 			System.out.println("came to controller wrong password");

@@ -1,5 +1,6 @@
 package com.tns.placment_management_system.controller;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,14 @@ public class CollegeController {
 	
 	@DeleteMapping("/deleteCollegeById/{id}")
 	public ResponseEntity<String> deleteById(@PathVariable Long id) {
-		boolean b = service.deleteById(id);
+		boolean b;
+		try {
+			b = service.deleteById(id);
+		} catch (org.springframework.dao.DataIntegrityViolationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return new ResponseEntity<String>("some records are dependent on this college",HttpStatus.EXPECTATION_FAILED);
+		}
 		if(b) {
 			return new ResponseEntity<String>("deleted successfully",HttpStatus.OK);
 		}else {

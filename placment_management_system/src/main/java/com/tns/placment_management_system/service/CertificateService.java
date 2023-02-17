@@ -1,5 +1,6 @@
 package com.tns.placment_management_system.service;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,8 @@ public class CertificateService {
 		try {
 			repo.deleteById(Id);
 			return true;
-		}catch (Exception e) {
+		}
+		catch (Exception e) {
 			return false;	
 		}
 	}

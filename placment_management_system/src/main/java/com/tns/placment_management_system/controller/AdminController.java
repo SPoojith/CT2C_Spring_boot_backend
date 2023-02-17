@@ -34,7 +34,13 @@ public class AdminController {
 	
 	@DeleteMapping("/deleteAdminById/{id}")
 	public ResponseEntity<String> deleteById(@PathVariable Long id) {
-		boolean b = service.deleteAdminById(id);
+		boolean b;
+		try {
+			b = service.deleteAdminById(id);
+		}catch (org.springframework.dao.DataIntegrityViolationException e) {
+			// TODO Auto-generated catch block
+			return new ResponseEntity<String>("some students records are dependent on this certificate",HttpStatus.EXPECTATION_FAILED);
+		}
 		if(b) {
 			return new ResponseEntity<String>("deleted successfully",HttpStatus.OK);
 		}else {
